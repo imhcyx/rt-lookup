@@ -48,11 +48,25 @@ int *poptrie_alloc_leaf(unsigned int n) {
   return p;
 }
 
+void poptrie_free_subnode(struct poptrie_node *p) {
+  int i, count;
+
+  free(p->base0);
+
+  count = __builtin_popcountll(p->vector);
+  for (i = 0; i < count; i++)
+    poptrie_free_subnode(&p->base1[i]);
+
+  free(p->base1);
+}
+
 void poptrie_init() {
   poptrie = poptrie_alloc_node(1);
 }
 
 void poptrie_destroy() {
+  poptrie_free_subnode(poptrie);
+  free(poptrie);
 }
 
 void poptrie_fill_unset_leaves(struct poptrie_node *p, int port) {
